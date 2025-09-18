@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voicenotes</title>
-    <meta name="description" content="Modern voice note taking app with recording and playback">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#6366f1">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVm9pY2Vub3RlcyIsInNob3J0X25hbWUiOiJWb2ljZW5vdGVzIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmOGZhZmMiLCJ0aGVtZV9jb2xvciI6IiM2MzY2ZjEifQ==">
-    
     <style>
         * {
             margin: 0;
@@ -154,6 +148,27 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
+        .profile-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
         .main-content {
             flex: 1;
             display: flex;
@@ -212,8 +227,6 @@
             padding: 24px;
             overflow-y: auto;
         }
-
-
 
         .welcome-section {
             text-align: left;
@@ -281,7 +294,7 @@
             align-items: center;
         }
 
-        .play-btn, .record-note-btn {
+        .play-btn {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -296,7 +309,7 @@
             transition: all 0.2s ease;
         }
 
-        .play-btn:hover, .record-note-btn:hover {
+        .play-btn:hover {
             background: #5b5bf6;
             transform: translateY(-1px);
         }
@@ -313,6 +326,7 @@
         .note-actions {
             display: flex;
             gap: 4px;
+            position: relative;
         }
 
         .action-btn {
@@ -332,6 +346,279 @@
         .action-btn:hover {
             background: #e2e8f0;
             color: #475569;
+        }
+
+        /* Floating menu for three dots */
+        .floating-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .floating-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .menu-item:hover {
+            background: #f9fafb;
+        }
+
+        .menu-item:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .menu-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .menu-item.danger {
+            color: #dc2626;
+        }
+
+        .menu-item.danger:hover {
+            background: #fef2f2;
+        }
+
+        .menu-icon {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 4px 0;
+        }
+
+        .expandable-item {
+            position: relative;
+        }
+
+        .expandable-item .submenu {
+            display: none;
+            margin-left: 16px;
+            padding-left: 16px;
+            border-left: 1px solid #e5e7eb;
+        }
+
+        .expandable-item.expanded .submenu {
+            display: block;
+        }
+
+        /* Profile Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .profile-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .modal-section {
+            padding: 0 24px 24px;
+        }
+
+        .section-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .section-item:hover {
+            color: #6366f1;
+        }
+
+        .section-item:last-child {
+            border-bottom: none;
+        }
+
+        .section-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        .section-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .section-right {
+            font-size: 16px;
+            opacity: 0.5;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 24px;
+            background: #d1d5db;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #6366f1;
+        }
+
+        .toggle-slider {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .new-badge {
+            background: #10b981;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .whatsapp-item {
+            color: #25d366;
+        }
+
+        .theme-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .record-section {
@@ -369,11 +656,18 @@
         }
 
         .record-note-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             background: #1e293b;
+            color: white;
+            border: none;
             border-radius: 28px;
             padding: 14px 28px;
             font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
             box-shadow: 0 4px 16px rgba(30, 41, 59, 0.3);
         }
 
@@ -386,13 +680,6 @@
         .record-note-btn.recording {
             background: #dc2626;
             animation: pulse 2s infinite;
-        }
-
-        .record-note-btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
         @keyframes pulse {
@@ -466,30 +753,6 @@
             line-height: 1.5;
         }
 
-        .status-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .status-message.show {
-            display: block;
-            animation: fadeInOut 3s ease;
-        }
-
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            10%, 90% { opacity: 1; }
-        }
-
         /* Mobile responsive */
         @media (max-width: 768px) {
             .container {
@@ -498,8 +761,6 @@
 
             .header {
                 padding: 12px 16px;
-                flex-wrap: wrap;
-                gap: 12px;
             }
 
             .search-bar {
@@ -528,10 +789,12 @@
                 font-size: 12px;
             }
 
-            .header-controls {
-                flex-wrap: wrap;
-                width: 100%;
-                justify-content: space-between;
+            .profile-modal {
+                width: 95%;
+            }
+
+            .floating-menu {
+                min-width: 160px;
             }
         }
 
@@ -560,6 +823,17 @@
             0%, 100% { transform: scaleY(0.3); }
             50% { transform: scaleY(1); }
         }
+
+        /* Click outside to close */
+        .click-outside-handler {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            background: transparent;
+        }
     </style>
 </head>
 <body>
@@ -581,6 +855,9 @@
                 <button class="upgrade-btn" onclick="upgrade()">
                     ⚡ Upgrade
                 </button>
+                <button class="profile-btn" onclick="openProfile()" id="profileBtn">
+                    G
+                </button>
             </div>
         </div>
 
@@ -599,8 +876,6 @@
                         Hi, welcome to Voicenotes. This is your space to capture notes, meetings, or anything you want to remember.
                         <br><br>
                         To start, just tap the Record button and speak naturally—no need to plan what you'll say...
-                        <br><br>
-                        Try creating notes using the "Create Note" button to test the interface!
                     </p>
 
                     <div class="sample-note">
@@ -609,7 +884,7 @@
                         </div>
                         <div class="note-title">Welcome to Voicenotes</div>
                         <div class="note-content">
-                            Hi, welcome to Voicenotes. This is your space to capture notes, meetings, or anything you want to remember. Click the buttons below to test the interface!
+                            Hi, welcome to Voicenotes. This is your space to capture notes, meetings, or anything you want to remember.
                         </div>
                         <div class="note-controls">
                             <button class="play-btn" onclick="toggleSamplePlayback(this)">
@@ -622,10 +897,10 @@
                                 <button class="action-btn" onclick="createNote()">
                                     📝 Create
                                 </button>
-                                <button class="action-btn" onclick="shareNote(0)">
+                                <button class="action-btn" onclick="shareNote()">
                                     🔗 Share
                                 </button>
-                                <button class="action-btn" onclick="showMore()">
+                                <button class="action-btn" onclick="showFloatingMenu(event, 'sample')">
                                     ⋯
                                 </button>
                             </div>
@@ -656,8 +931,170 @@
         <div class="recording-indicator" id="recordingIndicator">
             🔴 Recording... Speak now or press the button again to stop.
         </div>
+    </div>
 
-        <div class="status-message" id="statusMessage"></div>
+    <!-- Floating Menu for Three Dots -->
+    <div class="floating-menu" id="floatingMenu">
+        <button class="menu-item" onclick="copyNote()">
+            <span>Copy note</span>
+            <span class="menu-icon">📋</span>
+        </button>
+        <button class="menu-item" onclick="shareNoteFromMenu()">
+            <span>Share</span>
+            <span class="menu-icon">🔗</span>
+        </button>
+        <button class="menu-item" onclick="createNoteFromMenu()">
+            <span>Create</span>
+            <span class="menu-icon">📝</span>
+        </button>
+        <button class="menu-item" onclick="recordSubnote()">
+            <span>Record subnote</span>
+            <span class="menu-icon">🎙️</span>
+        </button>
+        <div class="expandable-item">
+            <button class="menu-item" onclick="toggleAttach()">
+                <span>Attach</span>
+                <span class="menu-icon">📎</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="attachPhoto()">
+                    <span>Add photo</span>
+                    <span class="menu-icon">📷</span>
+                </button>
+                <button class="menu-item" onclick="attachLink()">
+                    <span>Attach link</span>
+                    <span class="menu-icon">🔗</span>
+                </button>
+            </div>
+        </div>
+        <button class="menu-item" onclick="tagNote()">
+            <span>Tag</span>
+            <span class="menu-icon">#</span>
+        </button>
+        <div class="expandable-item">
+            <button class="menu-item" onclick="toggleFix()">
+                <span>Fix</span>
+                <span class="menu-icon">🔧</span>
+            </button>
+            <div class="submenu">
+                <button class="menu-item" onclick="suggestFix()">
+                    <span>Suggest a fix</span>
+                    <span class="menu-icon">💡</span>
+                </button>
+                <button class="menu-item" onclick="changeLanguage()">
+                    <span>Change language</span>
+                    <span class="menu-icon">🌐</span>
+                </button>
+            </div>
+        </div>
+        <button class="menu-item" onclick="downloadNote()">
+            <span>Download</span>
+            <span class="menu-icon">⬇️</span>
+        </button>
+        <button class="menu-item" onclick="editNote()">
+            <span>Edit</span>
+            <span class="menu-icon">✏️</span>
+        </button>
+        <div class="menu-divider"></div>
+        <button class="menu-item danger" onclick="deleteNoteFromMenu()">
+            <span>Delete</span>
+            <span class="menu-icon">🗑️</span>
+        </button>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <div></div>
+                <button class="modal-close" onclick="closeProfile()">×</button>
+            </div>
+            <div class="profile-info">
+                <div class="profile-avatar">G</div>
+                <div class="profile-name">Ghanashyam Gawas</div>
+                <div class="profile-email">ghanashyam@example.com</div>
+            </div>
+            <div class="modal-section">
+                <div class="section-item" onclick="editProfile()">
+                    <div class="section-left">
+                        <span class="section-icon">👤</span>
+                        <span class="section-text">Name</span>
+                    </div>
+                    <div class="section-right">Ghanashyam Gawas ></div>
+                </div>
+                <div class="section-item" onclick="editAbout()">
+                    <div class="section-left">
+                        <span class="section-icon">📝</span>
+                        <span class="section-text">About</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item" onclick="changeLanguage()">
+                    <div class="section-left">
+                        <span class="section-icon">🌐</span>
+                        <span class="section-text">Language</span>
+                    </div>
+                    <div class="section-right">Detect language ⌄</div>
+                </div>
+                <div class="section-item" onclick="manageNames()">
+                    <div class="section-left">
+                        <span class="section-icon">👥</span>
+                        <span class="section-text">Names to remember</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item" onclick="toggleSummarize()">
+                    <div class="section-left">
+                        <span class="section-icon">📊</span>
+                        <span class="section-text">Summarize long recordings</span>
+                    </div>
+                    <div class="toggle-switch active" id="summarizeToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="section-item" onclick="manageTeams()">
+                    <div class="section-left">
+                        <span class="section-icon">👥</span>
+                        <span class="section-text">Teams</span>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item" onclick="importData()">
+                    <div class="section-left">
+                        <span class="section-icon">📥</span>
+                        <span class="section-text">Import</span>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item" onclick="managePages()">
+                    <div class="section-left">
+                        <span class="section-icon">📄</span>
+                        <span class="section-text">Pages</span>
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item whatsapp-item" onclick="connectWhatsApp()">
+                    <div class="section-left">
+                        <span class="section-icon">💬</span>
+                        <span class="section-text">WhatsApp</span>
+                    </div>
+                    <div class="section-right">></div>
+                </div>
+                <div class="section-item" onclick="changeTheme()">
+                    <div class="section-left">
+                        <span class="section-icon">🌙</span>
+                        <span class="section-text">Theme</span>
+                    </div>
+                    <div class="theme-selector">
+                        <span>☀️ Day</span>
+                        <span>⌄</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -667,9 +1104,12 @@
         let notes = [];
         let recordingStartTime;
         let currentAudio = null;
+        let currentActiveMenu = null;
+        let currentNoteId = null;
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
+            // Load notes from memory (not localStorage to avoid Claude.ai restrictions)
             displayNotes();
             
             // Keyboard shortcuts
@@ -677,29 +1117,333 @@
                 if (e.ctrlKey && e.key === 'k') {
                     e.preventDefault();
                     document.getElementById('searchInput').focus();
+                } else if (e.key === ' ' && e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    toggleRecording();
+                } else if (e.key === 'Escape') {
+                    closeFloatingMenu();
+                    closeProfile();
                 }
             });
 
             // Search functionality
             document.getElementById('searchInput').addEventListener('input', handleSearch);
-            
-            // Load sample data after a short delay
-            setTimeout(() => {
-                if (notes.length === 0) {
-                    loadSampleData();
+
+            // Click outside to close menus
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.floating-menu') && !e.target.closest('.action-btn')) {
+                    closeFloatingMenu();
                 }
-            }, 1500);
+            });
         });
 
-        function toggleRecording() {
-            showStatus('Recording feature coming soon! For now, try creating text notes.');
+        function showFloatingMenu(event, noteId) {
+            event.stopPropagation();
+            closeFloatingMenu(); // Close any existing menu
+            
+            const menu = document.getElementById('floatingMenu');
+            const button = event.target.closest('.action-btn');
+            const rect = button.getBoundingClientRect();
+            
+            // Position the menu
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.bottom + 8) + 'px';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            
+            menu.classList.add('active');
+            currentActiveMenu = menu;
+            currentNoteId = noteId;
+        }
+
+        function closeFloatingMenu() {
+            const menu = document.getElementById('floatingMenu');
+            menu.classList.remove('active');
+            currentActiveMenu = null;
+            currentNoteId = null;
+            
+            // Close all expanded submenus
+            document.querySelectorAll('.expandable-item').forEach(item => {
+                item.classList.remove('expanded');
+            });
+        }
+
+        function toggleAttach() {
+            const item = event.target.closest('.expandable-item');
+            item.classList.toggle('expanded');
+        }
+
+        function toggleFix() {
+            const item = event.target.closest('.expandable-item');
+            item.classList.toggle('expanded');
+        }
+
+        function openProfile() {
+            document.getElementById('profileModal').classList.add('active');
+        }
+
+        function closeProfile() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+
+        function toggleSummarize() {
+            const toggle = document.getElementById('summarizeToggle');
+            toggle.classList.toggle('active');
+        }
+
+        // Floating menu functions
+        function copyNote() {
+            const noteText = currentNoteId === 'sample' ? 
+                'Welcome to Voicenotes\n\nHi, welcome to Voicenotes. This is your space to capture notes, meetings, or anything you want to remember.' :
+                getSelectedNoteText();
+            
+            navigator.clipboard.writeText(noteText).then(() => {
+                showNotification('Note copied to clipboard!');
+            }).catch(() => {
+                showNotification('Failed to copy note');
+            });
+            closeFloatingMenu();
+        }
+
+        function shareNoteFromMenu() {
+            shareNote(currentNoteId);
+            closeFloatingMenu();
+        }
+
+        function createNoteFromMenu() {
+            createNote();
+            closeFloatingMenu();
+        }
+
+        function recordSubnote() {
+            showNotification('Recording subnote... This feature allows you to add additional recordings to existing notes.');
+            closeFloatingMenu();
+        }
+
+        function attachPhoto() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    showNotification(`Photo "${file.name}" attached to note!`);
+                }
+            };
+            input.click();
+            closeFloatingMenu();
+        }
+
+        function attachLink() {
+            const link = prompt('Enter link URL:');
+            if (link) {
+                showNotification(`Link "${link}" attached to note!`);
+            }
+            closeFloatingMenu();
+        }
+
+        function tagNote() {
+            const tag = prompt('Add tag (without #):');
+            if (tag) {
+                showNotification(`Tag #${tag} added to note!`);
+            }
+            closeFloatingMenu();
+        }
+
+        function suggestFix() {
+            showNotification('AI will suggest improvements to this note...');
+            closeFloatingMenu();
+        }
+
+        function changeLanguage() {
+            const languages = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese'];
+            const selected = prompt(`Select language:\n${languages.map((l, i) => `${i+1}. ${l}`).join('\n')}`);
+            if (selected) {
+                showNotification(`Language changed to ${languages[parseInt(selected)-1] || 'Auto-detect'}`);
+            }
+            closeFloatingMenu();
+        }
+
+        function downloadNote() {
+            const noteText = getSelectedNoteText();
+            const blob = new Blob([noteText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `note-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Note downloaded!');
+            closeFloatingMenu();
+        }
+
+        function editNote() {
+            showNotification('Opening note editor...');
+            closeFloatingMenu();
+        }
+
+        function deleteNoteFromMenu() {
+            if (confirm('Are you sure you want to delete this note?')) {
+                showNotification('Note deleted!');
+                if (currentNoteId && currentNoteId !== 'sample') {
+                    deleteNote(currentNoteId);
+                }
+            }
+            closeFloatingMenu();
+        }
+
+        // Profile modal functions
+        function editProfile() {
+            const name = prompt('Enter your name:', 'Ghanashyam Gawas');
+            if (name) {
+                document.querySelector('.profile-name').textContent = name;
+                document.querySelector('.profile-btn').textContent = name.charAt(0).toUpperCase();
+                document.querySelector('.profile-avatar').textContent = name.charAt(0).toUpperCase();
+                showNotification('Profile updated!');
+            }
+        }
+
+        function editAbout() {
+            const about = prompt('Tell us about yourself:');
+            if (about) {
+                showNotification('About section updated!');
+            }
+        }
+
+        function manageNames() {
+            showNotification('Names to remember feature helps AI recognize people in your recordings.');
+        }
+
+        function manageTeams() {
+            showNotification('Teams feature allows you to collaborate with colleagues.');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt,.json,.csv';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    showNotification(`Importing data from "${file.name}"...`);
+                }
+            };
+            input.click();
+        }
+
+        function managePages() {
+            showNotification('Pages feature lets you organize notes into collections.');
+        }
+
+        function connectWhatsApp() {
+            showNotification('WhatsApp integration coming soon! Send voice messages directly to Voicenotes.');
+        }
+
+        function changeTheme() {
+            const themes = ['Light', 'Dark', 'Auto'];
+            const selected = prompt(`Select theme:\n${themes.map((t, i) => `${i+1}. ${t}`).join('\n')}`);
+            if (selected) {
+                showNotification(`Theme changed to ${themes[parseInt(selected)-1] || 'Auto'}`);
+            }
+        }
+
+        function getSelectedNoteText() {
+            if (currentNoteId === 'sample') {
+                return 'Welcome to Voicenotes\n\nHi, welcome to Voicenotes. This is your space to capture notes, meetings, or anything you want to remember.';
+            }
+            const note = notes.find(n => n.id === currentNoteId);
+            return note ? `${note.title}\n\n${note.content}` : 'Note not found';
+        }
+
+        function showNotification(message) {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1f2937;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 10000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.style.opacity = '1', 10);
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        async function toggleRecording() {
+            const recordBtn = document.getElementById('recordBtn');
+            const recordIcon = document.getElementById('recordIcon');
+            const recordText = document.getElementById('recordText');
+            const audioWave = document.getElementById('audioWave');
+            const indicator = document.getElementById('recordingIndicator');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    recordedChunks = [];
+                    recordingStartTime = Date.now();
+
+                    mediaRecorder.ondataavailable = function(event) {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = function() {
+                        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(blob);
+                        const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+                        
+                        saveNote(audioUrl, duration);
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+
+                    recordBtn.classList.add('recording');
+                    recordIcon.textContent = '⏹️';
+                    recordText.textContent = 'Stop recording';
+                    audioWave.style.display = 'inline-flex';
+                    indicator.classList.add('active');
+
+                } catch (error) {
+                    alert('Could not access microphone. Please check permissions and ensure you\'re using HTTPS.');
+                    console.error('Error accessing microphone:', error);
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+
+                recordBtn.classList.remove('recording');
+                recordIcon.textContent = '⚪';
+                recordText.textContent = 'Record a note';
+                audioWave.style.display = 'none';
+                indicator.classList.remove('active');
+            }
         }
 
         function saveNote(audioUrl, duration) {
             const now = new Date();
             const note = {
                 id: Date.now(),
-                title: `Voice Note ${notes.filter(n => n.audioUrl).length + 1}`,
+                title: `Voice Note ${notes.length + 1}`,
                 content: 'Voice recording - click play to listen',
                 audioUrl: audioUrl,
                 duration: formatDuration(duration),
@@ -734,23 +1478,15 @@
                     <div class="note-title">${note.title}</div>
                     <div class="note-content">${note.content}</div>
                     <div class="note-controls">
-                        ${note.audioUrl ? `
-                            <button class="play-btn" onclick="playNote('${note.audioUrl}', this, ${note.id})">
-                                <span class="play-icon">▶️</span>
-                                <span class="duration">${note.duration}</span>
-                            </button>
-                        ` : `
-                            <button class="play-btn" style="background: #64748b;">
-                                <span>📝</span>
-                                <span>Text Note</span>
-                            </button>
-                        `}
+                        <button class="play-btn" onclick="playNote('${note.audioUrl}', this, ${note.id})">
+                            <span class="play-icon">▶️</span>
+                            <span class="duration">${note.duration}</span>
+                        </button>
                         <div class="note-actions">
                             <button class="action-btn" onclick="askAI()">🤖 Ask AI</button>
-                            <button class="action-btn" onclick="editNote(${note.id})">✏️ Edit</button>
+                            <button class="action-btn" onclick="createNote()">📝 Create</button>
                             <button class="action-btn" onclick="shareNote(${note.id})">🔗 Share</button>
-                            <button class="action-btn" onclick="toggleStar(${note.id})">${note.isStarred ? '⭐' : '☆'}</button>
-                            <button class="action-btn" onclick="deleteNote(${note.id})">🗑️</button>
+                            <button class="action-btn" onclick="showFloatingMenu(event, ${note.id})">⋯</button>
                         </div>
                     </div>
                 </div>
@@ -766,23 +1502,16 @@
                 currentAudio.currentTime = 0;
                 // Reset all play buttons
                 document.querySelectorAll('.play-btn').forEach(btn => {
-                    const icon = btn.querySelector('.play-icon');
-                    if (icon) {
-                        icon.textContent = '▶️';
-                        btn.classList.remove('playing');
-                    }
+                    btn.querySelector('.play-icon').textContent = '▶️';
+                    btn.classList.remove('playing');
                 });
             }
 
             if (playIcon.textContent === '▶️') {
                 currentAudio = new Audio(audioUrl);
-                currentAudio.play().then(() => {
-                    playIcon.textContent = '⏸️';
-                    button.classList.add('playing');
-                }).catch(error => {
-                    console.error('Error playing audio:', error);
-                    showStatus('Error playing audio file');
-                });
+                currentAudio.play();
+                playIcon.textContent = '⏸️';
+                button.classList.add('playing');
                 
                 currentAudio.onended = function() {
                     playIcon.textContent = '▶️';
@@ -805,7 +1534,6 @@
             
             // Simulate playback
             if (playIcon === '⏸️') {
-                showStatus('Playing sample audio...');
                 setTimeout(() => {
                     button.innerHTML = `▶️ <span class="duration">${duration}</span>`;
                 }, 2000);
@@ -813,30 +1541,12 @@
         }
 
         function deleteNote(id) {
-            if (confirm('Are you sure you want to delete this note?')) {
-                notes = notes.filter(note => note.id !== id);
-                displayNotes();
-                showStatus('Note deleted');
-                
-                if (notes.length === 0) {
-                    document.getElementById('welcome-section').style.display = 'block';
-                    document.getElementById('notes-list').classList.remove('active');
-                }
-            }
-        }
-
-        function editNote(id) {
-            const note = notes.find(n => n.id === id);
-            if (note) {
-                const newTitle = prompt('Edit note title:', note.title);
-                const newContent = prompt('Edit note content:', note.content);
-                
-                if (newTitle !== null && newContent !== null) {
-                    note.title = newTitle || note.title;
-                    note.content = newContent || note.content;
-                    displayNotes();
-                    showStatus('Note updated');
-                }
+            notes = notes.filter(note => note.id !== id);
+            displayNotes();
+            
+            if (notes.length === 0) {
+                document.getElementById('welcome-section').style.display = 'block';
+                document.getElementById('notes-list').classList.remove('active');
             }
         }
 
@@ -845,7 +1555,6 @@
             if (note) {
                 note.isStarred = !note.isStarred;
                 displayNotes();
-                showStatus(note.isStarred ? 'Note starred' : 'Note unstarred');
             }
         }
 
@@ -880,38 +1589,21 @@
             // Filter notes based on tab
             if (tab === 'starred') {
                 const starredNotes = notes.filter(note => note.isStarred);
-                displayFilteredNotes(starredNotes, 'starred');
-            } else if (tab === 'shared') {
-                const sharedNotes = []; // Placeholder for shared notes
-                displayFilteredNotes(sharedNotes, 'shared');
+                displayFilteredNotes(starredNotes);
             } else {
                 displayNotes();
             }
         }
 
-        function displayFilteredNotes(filteredNotes, type = 'filtered') {
+        function displayFilteredNotes(filteredNotes) {
             const notesList = document.getElementById('notes-list');
             
             if (filteredNotes.length === 0) {
-                let emptyMessage = '';
-                let emptyIcon = '';
-                
-                if (type === 'starred') {
-                    emptyIcon = '⭐';
-                    emptyMessage = 'No starred notes<br>Star your favorite notes to find them quickly here.';
-                } else if (type === 'shared') {
-                    emptyIcon = '🔗';
-                    emptyMessage = 'No shared notes<br>Share notes with others to see them here.';
-                } else {
-                    emptyIcon = '🔍';
-                    emptyMessage = 'No notes found<br>Try adjusting your search terms.';
-                }
-                
                 notesList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">${emptyIcon}</div>
-                        <h3>${emptyMessage.split('<br>')[0]}</h3>
-                        <p>${emptyMessage.split('<br>')[1] || ''}</p>
+                        <div class="empty-state-icon">⭐</div>
+                        <h3>No starred notes</h3>
+                        <p>Star your favorite notes to find them quickly here.</p>
                     </div>
                 `;
                 return;
@@ -925,23 +1617,16 @@
                     <div class="note-title">${note.title}</div>
                     <div class="note-content">${note.content}</div>
                     <div class="note-controls">
-                        ${note.audioUrl ? `
-                            <button class="play-btn" onclick="playNote('${note.audioUrl}', this, ${note.id})">
-                                <span class="play-icon">▶️</span>
-                                <span class="duration">${note.duration}</span>
-                            </button>
-                        ` : `
-                            <button class="play-btn" style="background: #64748b;">
-                                <span>📝</span>
-                                <span>Text Note</span>
-                            </button>
-                        `}
+                        <button class="play-btn" onclick="playNote('${note.audioUrl}', this, ${note.id})">
+                            <span class="play-icon">▶️</span>
+                            <span class="duration">${note.duration}</span>
+                        </button>
                         <div class="note-actions">
                             <button class="action-btn" onclick="askAI()">🤖 Ask AI</button>
-                            <button class="action-btn" onclick="editNote(${note.id})">✏️ Edit</button>
+                            <button class="action-btn" onclick="createNote()">📝 Create</button>
                             <button class="action-btn" onclick="shareNote(${note.id})">🔗 Share</button>
                             <button class="action-btn" onclick="toggleStar(${note.id})">${note.isStarred ? '⭐' : '☆'}</button>
-                            <button class="action-btn" onclick="deleteNote(${note.id})">🗑️</button>
+                            <button class="action-btn" onclick="showFloatingMenu(event, ${note.id})">⋯</button>
                         </div>
                     </div>
                 </div>
@@ -961,30 +1646,27 @@
                 note.content.toLowerCase().includes(searchTerm)
             );
             
-            displayFilteredNotes(filteredNotes, 'search');
+            displayFilteredNotes(filteredNotes);
         }
 
         function recordMeeting() {
-            showStatus('Meeting recording feature coming soon! This will allow you to record longer sessions with speaker identification.');
+            alert('Meeting recording feature coming soon! This will allow you to record longer sessions with speaker identification.');
         }
 
         function askAI() {
-            showStatus('AI feature coming soon! You\'ll be able to ask questions about your notes and get smart summaries.');
+            alert('AI feature coming soon! You\'ll be able to ask questions about your notes and get smart summaries.');
         }
 
         function createNote() {
             const title = prompt('Enter note title:', `Note ${notes.length + 1}`);
-            if (title === null) return; // User cancelled
-            
             const content = prompt('Enter note content:', '');
-            if (content === null) return; // User cancelled
             
-            if (title.trim() || content.trim()) {
+            if (title && content) {
                 const now = new Date();
                 const note = {
                     id: Date.now(),
-                    title: title.trim() || `Note ${notes.length + 1}`,
-                    content: content.trim() || 'Empty note',
+                    title: title,
+                    content: content,
                     audioUrl: null,
                     duration: null,
                     timestamp: now.toISOString(),
@@ -994,7 +1676,6 @@
                 
                 notes.unshift(note);
                 displayNotes();
-                showStatus('Note created successfully!');
                 
                 if (notes.length === 1) {
                     document.getElementById('welcome-section').style.display = 'none';
@@ -1006,127 +1687,83 @@
         function shareNote(id) {
             const note = notes.find(n => n.id === id);
             if (note) {
+                // Create a shareable text version
                 const shareText = `${note.title}\n\n${note.content}\n\nCreated: ${note.displayTime}`;
                 
                 if (navigator.share) {
                     navigator.share({
                         title: note.title,
                         text: shareText
-                    }).then(() => {
-                        showStatus('Note shared successfully!');
-                    }).catch(err => {
-                        console.log('Error sharing:', err);
-                        fallbackShare(shareText);
-                    });
+                    }).catch(console.error);
                 } else {
-                    fallbackShare(shareText);
+                    // Fallback to clipboard
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        showNotification('Note copied to clipboard!');
+                    }).catch(() => {
+                        showNotification('Share feature coming soon! Full sharing capabilities will be available soon.');
+                    });
                 }
-            }
-        }
-
-        function fallbackShare(text) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showStatus('Note copied to clipboard!');
-                }).catch(() => {
-                    showStatus('Unable to copy. Try selecting and copying manually.');
-                });
-            } else {
-                // Create a temporary textarea for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                    document.execCommand('copy');
-                    showStatus('Note copied to clipboard!');
-                } catch (err) {
-                    showStatus('Unable to copy. Try selecting and copying manually.');
-                }
-                document.body.removeChild(textarea);
             }
         }
 
         function addTab() {
             const tabName = prompt('Enter tab name:', 'New Tab');
             if (tabName) {
-                showStatus(`Custom tabs coming soon! "${tabName}" will be available in a future update.`);
+                showNotification(`Custom tabs coming soon! "${tabName}" will be available in a future update.`);
             }
         }
 
         function upgrade() {
-            showStatus('Upgrade to Pro for unlimited recording time, AI-powered features, and more! Full upgrade options coming soon.');
+            alert('Upgrade to Pro for:\n\n• Unlimited recording time\n• AI-powered transcription\n• Advanced search\n• Team collaboration\n• Export options\n\nFull upgrade options coming soon!');
         }
 
-        function showMore() {
-            showStatus('Additional options: Edit, Duplicate, Export, Tags, and Reminders - Coming soon in the next update!');
-        }
-
-        // Load sample data for demonstration
-        function loadSampleData() {
-            const sampleNotes = [
-                {
-                    id: Date.now() - 1000,
-                    title: 'Meeting Notes - Project Alpha',
-                    content: 'Discussed project timeline, budget allocation, and team responsibilities. Next steps include finalizing the design mockups and setting up the development environment.',
-                    audioUrl: null,
-                    duration: null,
-                    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-                    displayTime: formatTime(new Date(Date.now() - 2 * 60 * 60 * 1000)),
-                    isStarred: true
-                },
-                {
-                    id: Date.now() - 2000,
-                    title: 'Shopping List',
-                    content: 'Groceries needed: Milk, eggs, bread, apples, chicken breast, olive oil, pasta, tomatoes, cheese, yogurt.',
-                    audioUrl: null,
-                    duration: null,
-                    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-                    displayTime: formatTime(new Date(Date.now() - 24 * 60 * 60 * 1000)),
-                    isStarred: false
-                },
-                {
-                    id: Date.now() - 3000,
-                    title: 'Book Ideas',
-                    content: 'Ideas for the novel: Character development for the protagonist, plot twist in chapter 7, research needed on historical events.',
-                    audioUrl: null,
-                    duration: null,
-                    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-                    displayTime: formatTime(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)),
-                    isStarred: true
-                }
-            ];
-            
-            notes = sampleNotes;
-            displayNotes();
-            document.getElementById('welcome-section').style.display = 'none';
-            document.getElementById('notes-list').classList.add('active');
-        }
-
-        // Prevent page refresh on space bar when not in input
-        document.addEventListener('keydown', function(e) {
-            if (e.key === ' ' && e.target === document.body) {
-                e.preventDefault();
-            }
-        });
-
-        // Service Worker registration for PWA (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Service worker registration code would go here for PWA functionality
-            });
-        }
-
-        // Auto-save simulation
+        // Auto-save functionality simulation
         function autoSave() {
-            if (notes.length > 0) {
-                console.log('Auto-saving notes...', notes.length, 'notes saved');
-            }
+            // In a real app, this would sync with a backend
+            console.log('Auto-saving notes...', notes.length, 'notes saved');
         }
 
         // Auto-save every 30 seconds
         setInterval(autoSave, 30000);
+
+        // Initialize with sample data after a short delay
+        setTimeout(() => {
+            if (confirm('Would you like to load some sample notes to see how the app works?')) {
+                loadSampleData();
+                document.getElementById('welcome-section').style.display = 'none';
+                document.getElementById('notes-list').classList.add('active');
+            }
+        }, 1000);
+
+        function loadSampleData() {
+            if (notes.length === 0) {
+                const sampleNotes = [
+                    {
+                        id: 1,
+                        title: 'Meeting Notes - Project Alpha',
+                        content: 'Discussed project timeline, budget allocation, and team responsibilities. Next steps include finalizing the design mockups.',
+                        audioUrl: null,
+                        duration: '02:34',
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                        displayTime: formatTime(new Date(Date.now() - 2 * 60 * 60 * 1000)),
+                        isStarred: true
+                    },
+                    {
+                        id: 2,
+                        title: 'Shopping List',
+                        content: 'Milk, eggs, bread, apples, chicken breast, olive oil, pasta, tomatoes.',
+                        audioUrl: null,
+                        duration: '00:45',
+                        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+                        displayTime: formatTime(new Date(Date.now() - 24 * 60 * 60 * 1000)),
+                        isStarred: false
+                    }
+                ];
+                
+                notes = sampleNotes;
+                displayNotes();
+            }
+        }
     </script>
 </body>
 </html>
-
